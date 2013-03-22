@@ -16,6 +16,6 @@ Dependencies:
 Standard
 - numpy
 - scipy
-MCC utilities (see the MCTwo GitHub account: https://github.com/MCTwo)
+MCC utilities (see git://github.com/MCTwo/MCCutils.git)
 - profiles
 - cosmo
