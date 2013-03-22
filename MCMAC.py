@@ -1,6 +1,6 @@
 '''
-Version 1.1
-- Added softening length to potential calculation.
+Version 0.0
+- The initial version of the old TSM_v11 that is now being tracked in Git.
 '''
 from __future__ import division
 import numpy
