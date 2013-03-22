@@ -141,7 +141,7 @@ def PEnfwnfw(d,m_1,rho_s_1,r_s_1,r_200_1,m_2,rho_s_2,r_s_2,r_200_2,N=100):
         V_total = V_nfw+V_pt
     return V_total
 
-def MCMCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,del_mesh=100,TSM_mesh=200):
+def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,del_mesh=100,TSM_mesh=200):
     '''
     This is the Monte Carlo engine that draws random parameters from the
     measured distributions and then calculates the kenematic parameters of the
