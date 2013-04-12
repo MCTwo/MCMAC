@@ -42,7 +42,7 @@ def randdraw(A,index=None):
             index = numpy.random.randint(N_A)
         a = A[index]
     elif N_A <2:
-        print 'TSM.randdraw: Error, parameter input array is not a valid size, exiting'
+        print 'MCMAC.randdraw: Error, parameter input array is not a valid size, exiting'
         sys.exit()
     return a, index
 
@@ -316,8 +316,9 @@ def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,TSM_mes
             # distribution is speficied since at least part of the tail will be
             # in the negative mass range.
             continue
-        z_1 = randdraw(Z1)
-        z_2 = randdraw(Z2)
+        z_1, temp = randdraw(Z1)
+        z_2, temp = randdraw(Z2)
+        
         # Draw random projected separation
         if N_d == 3: #then assumed (D_proj, c1_sigma, c2_sigma)
             #draw del_r1, del_r2, phi1 and phi2, where phi is the 
@@ -327,8 +328,14 @@ def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,TSM_mes
             phi_2 = numpy.random.rand()*2*numpy.pi
             #calculate the projected separation based on drawn centers
             d_proj = numpy.sqrt((D_proj[0]-del_r_1*numpy.cos(phi_1)+del_r_2*numpy.cos(phi_2))**2+(del_r_1*numpy.sin(phi_1)+del_r_2*numpy.sin(phi_2))**2)
-        elif N_d > 3: #then assumed distribution array format
-            d_proj = D_proj[numpy.random.randint(N_d)]
+        elif N_d > 3: #then assume distribution array format
+            if N_D_proj == N_M1:
+                # assume D_proj array values and order correlated with M1 and M2
+                # array values and order.
+                d_proj, index = randdraw(D_proj,index)
+            else:
+                # assume D_proj is uncorrelated with M1 and M2
+                d_proj = D_proj[numpy.random.randint(N_d)]
         elif N_d < 3:
             print 'MCMAC.MCengine: Error, D_proj parameter input array is not a valid size, exiting'
             sys.exit()
@@ -341,12 +348,12 @@ def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,TSM_mes
         else:
             # Then user specified concentration
             # Draw random concentration parameter
-            c_1 = randdraw(C1)
+            c_1, index = randdraw(C1,index)
             del_c_1, r_s_1, r_200_1, c_1, rho_s_1 = NFWprop(m_1,z_1,c_1)
         if C2 == None:
             del_c_2, r_s_2, r_200_2, c_2, rho_s_2 = profiles.nfwparam_extended(m_2/1e14,z_2)
         else:
-            c_2 = randdraw(C2)
+            c_2, index = randdraw(C2,index)
             del_c_2, r_s_2, r_200_2, c_2, rho_s_2 = NFWprop(m_2,z_2,c_2)
         
         # Reduced mass
