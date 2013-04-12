@@ -20,7 +20,7 @@ kminMpc = 3.08568025*10**19 # km in a Megaparsec
 minMpc = 3.08568025*10**22 # m in a Megaparsec            
 r2d = 180/numpy.pi # radians to degrees conversion factor
 
-def randdraw(A):
+def randdraw(A,index=None):
     '''
     This function randomly draws a variable from either and input gaussian
     distribution or an array of random draws from a parent distribution function
@@ -30,6 +30,7 @@ def randdraw(A):
         it is interpreted as (mu, sigma) of a Gaussian distribution. If (1D
         array of floats with length > 2) then it is interpreted as a random
         sample from a parent distribution.
+    index = [int] rather than drawing a random value from the array the value
     Output:
     a = [float] a random draw from either the Gaussian or sample distribution.
     '''
@@ -37,11 +38,13 @@ def randdraw(A):
     if N_A == 2: #then assumed (mu, sigma) format
         a = A[0]+A[1]*numpy.random.randn()
     elif N_A > 2: #Then assume distribution array format
-        a = A[numpy.random.randint(N_A)]
+        if index == None:
+            index = numpy.random.randint(N_A)
+        a = A[index]
     elif N_A <2:
         print 'TSM.randdraw: Error, parameter input array is not a valid size, exiting'
         sys.exit()
-    return a
+    return a, index
 
 def vrad(z1,z2):
     '''
@@ -306,9 +309,12 @@ def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,TSM_mes
     t_start = time.time()
     while i < N_mc:
         # Draw random mass and redshift parameters
-        m_1 = randdraw(M1)
-        m_2 = randdraw(M2)
+        m_1, index = randdraw(M1)
+        m_2, index = randdraw(M2,index)
         if m_1 <= 0 or m_2 <=0:
+            # Discard these unphysical draws, this can happen if a Gaussian 
+            # distribution is speficied since at least part of the tail will be
+            # in the negative mass range.
             continue
         z_1 = randdraw(Z1)
         z_2 = randdraw(Z2)
