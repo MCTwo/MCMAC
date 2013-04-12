@@ -175,7 +175,7 @@ def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,TSM_mes
         length > 2) then it is interpreted as a random sample from a parent 
         distribution.
     M2 = [(float, float) or (1D array of floats); units:M_sun] M_200 of 
-        subcluster 2. Similar input format to M1.
+        subcluster 2. Must have same format as M1.
     Z1 = [(float, float) or (1D array of floats)] redshift of subcluster 1.
         Similar input format to M1.
     Z2 = [(float, float) or (1D array of floats)] redshift of subcluster 2.
@@ -193,9 +193,10 @@ def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,TSM_mes
         (mu, sigma) of a Gaussian distribution. If (1D array of floats with 
         length > 2) then it is interpreted as a random sample from a parent 
         distribution. If None then Duffey et al. (2008) scaling relation is used
-        to determine the concentration based on M1 value.
+        to determine the concentration based on M1 value. Must have same format
+        as M1.
     C2 = [(float, float) or (1D array of floats); unitless] NFW concentration of 
-        subcluster 2. Similar input format to M1.
+        subcluster 2. Must have same format as M2.
     del_mesh = [int] number of mass elements along one coordinate axis for
         numerical integration approximation of potential energy
     TSM_mesh = [int] number of elements along the separation axis when
