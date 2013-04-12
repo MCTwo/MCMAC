@@ -13,10 +13,9 @@ to get posterior PDF's for merger dynamic properties of interest (e.g. collision
 time since collision).
 
 Dependencies:
-Standard
-- numpy
-- scipy
-
-MCC utilities (see git://github.com/MCTwo/MCCutils.git)
-- profiles
-- cosmo
+- Standard
+  - numpy
+  - scipy
+- MCC utilities (see git://github.com/MCTwo/MCCutils.git)
+  - profiles
+  - cosmo
