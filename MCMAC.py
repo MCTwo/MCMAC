@@ -236,6 +236,53 @@ def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,TSM_mes
        due to the system spending more of its time at large separation.  Simply
        an effect of the velocity of the system.
     '''
+    # Verify user input
+    # Check to make sure mass inputs for each halo are the same
+    N_M1 = numpy.size(M1)
+    N_M2 = numpy.size(M2)
+    if N_M1 != N_M2:
+        print 'MCMAC.MCengine: Error, the mass inputs for the two halos must \
+            be the same type and size. For example, you cannot mix input \
+            format (mu, sigma) for halo1 with (1D array of floats) format \
+            for halo 2. Nor can the size of the (1D array of floats) input \
+            be different. This is to facilitate correct covariance handeling. \
+            Exiting.' 
+        sys.exit()
+    
+    if C1 != None or C2 != None:
+        N_C1 = numpy.size(C1)
+        N_C2 = numpy.size(C2)
+        if N_C1 != N_M1 or N_C2 != N_M2:
+            print 'MCMAC.MCengine: Error, the concentration inputs for the two \
+            halos must be the same type and size as the mass inputs. For \
+            example, you cannot mix input format (mu, sigma) for M1 with \
+            (1D array of floats) format for C1, or vise versa. Nor can the size\
+            of the (1D array of floats) input be different. This is to \
+            facilitate correct covariance handeling. Exiting.'
+            sys.exit()
+        elif N_M1 > 2:
+            print 'MCMAC.MCengine: Assuming that the order and values of the \
+            C1 and C2 (1D array of floats) are correlated with the order and \
+            values of the M1 and M2 (1D array of floats). This is meant to \
+            maintain proper covariance.'
+    
+    N_D_proj = numpy.size(D_proj)
+    if N_D_proj == N_M1:
+        print 'MCMAC.MCengine: Assuming that the order and values of the \
+        D_proj (1D array of floats) are correlated with the order and values of\
+        the M1 and M2 (1D array of floats). This is meant to maintain proper\
+        covariance.'
+        
+    N_Z1 = numpy.size(Z1)
+    if N_Z1 == N_D_proj:
+        print 'MCMAC.MCengine: Warning. It is currently assumed that the halo\
+        redshifts and projected separation estimates are uncorrelated. \
+        Covariance will not be handled correctly.'
+    if N_Z1 >2 and N_Z1 == N_M1:
+        print 'MCMAC,MCengine: Warning. It is currently assumed that the halo \
+        redshifts and mass estimates are uncorrelated. Covariance will not be \
+        handled correctly.'
+        
     i = 0
     # Create the output arrays
     m_1_out = numpy.zeros(N_mc)
