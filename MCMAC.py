@@ -14,9 +14,11 @@ import cosmo
 # Constants and conversions
 G = 4.3*10**(-9) #newton's constant in units of Mpc*(km/s)**2 / M_sun
 c = 3e5 #speed of light km/s
-sinGyr = 31556926.*10**9
-kminMpc = 3.08568025*10**19
-r2d = 180/numpy.pi
+sinGyr = 31556926.*10**9 # s in a Giga-year
+kginMsun = 1.98892*10**30 # kg in a solar mass
+kminMpc = 3.08568025*10**19 # km in a Megaparsec
+minMpc = 3.08568025*10**22 # m in a Megaparsec            
+r2d = 180/numpy.pi # radians to degrees conversion factor
 
 def randdraw(A):
     '''
@@ -140,8 +142,27 @@ def PEnfwnfw(d,m_1,rho_s_1,r_s_1,r_200_1,m_2,rho_s_2,r_s_2,r_200_2,N=100):
         V_pt = numpy.sum(-G*m_1*m[mask_gt]/r[mask_gt])
         V_total = V_nfw+V_pt
     return V_total
+    
+def NFWprop(M_200,z,c):
+    '''
+    Determines the NFW halo related properties. Added this for the case of user
+    specified concentration.
+    Input:
+    M_200 = [float; units:M_sun] mass of the halo. Assumes M_200 with
+        respect to the critical density at the halo redshift.    
+    z = [float; unitless] redshift of the halo.
+    c = [float; unitless] concentration of the NFW halo.
+    '''
+    # CONSTANTS
+    rho_cr = cosmo.rhoCrit(z)/kginMsun*minMpc**3
+    #calculate the r_200 radius
+    r_200 = (M_200*3/(4*numpy.pi*200*rho_cr))**(1/3.)
+    del_c = 200/3.*c**3/(numpy.log(1+c)-c/(1+c))
+    r_s = r_200/c
+    rho_s = del_c*rho_cr   
+    return del_c, r_s, r_200, c, rho_s
 
-def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,del_mesh=100,TSM_mesh=200):
+def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,TSM_mesh=200):
     '''
     This is the Monte Carlo engine that draws random parameters from the
     measured distributions and then calculates the kenematic parameters of the
@@ -167,6 +188,14 @@ def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,del_mesh=100,TSM_mesh=200):
         with length > 3) then it is interpreted as a random sample from the 
         parent distribution of d_proj.
     prefix = [string] prefix to attach to all output
+    C1 = [(float, float) or (1D array of floats); unitless] NFW concentration of 
+        subcluster 1.  If (float, float) is input then it is interpreted as 
+        (mu, sigma) of a Gaussian distribution. If (1D array of floats with 
+        length > 2) then it is interpreted as a random sample from a parent 
+        distribution. If None then Duffey et al. (2008) scaling relation is used
+        to determine the concentration based on M1 value.
+    C2 = [(float, float) or (1D array of floats); unitless] NFW concentration of 
+        subcluster 2. Similar input format to M1.
     del_mesh = [int] number of mass elements along one coordinate axis for
         numerical integration approximation of potential energy
     TSM_mesh = [int] number of elements along the separation axis when
@@ -252,8 +281,20 @@ def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,del_mesh=100,TSM_mesh=200):
         d_proj = abs(d_proj)
         
         # Define NFW halo properties
-        del_c_1, r_s_1, r_200_1, c_1, rho_s_1 = profiles.nfwparam_extended(m_1/1e14,z_1)
-        del_c_2, r_s_2, r_200_2, c_2, rho_s_2 = profiles.nfwparam_extended(m_2/1e14,z_2)
+        if C1 == None:
+            # Then use scaling relation to determine concentration
+            del_c_1, r_s_1, r_200_1, c_1, rho_s_1 = profiles.nfwparam_extended(m_1/1e14,z_1)
+        else:
+            # Then user specified concentration
+            # Draw random concentration parameter
+            c_1 = randdraw(C1)
+            del_c_1, r_s_1, r_200_1, c_1, rho_s_1 = NFWprop(m_1,z_1,c_1)
+        if C2 == None:
+            del_c_2, r_s_2, r_200_2, c_2, rho_s_2 = profiles.nfwparam_extended(m_2/1e14,z_2)
+        else:
+            c_2 = randdraw(C2)
+            del_c_2, r_s_2, r_200_2, c_2, rho_s_2 = NFWprop(m_2,z_2,c_2)
+        
         # Reduced mass
         mu = m_1*m_2/(m_1+m_2)        
         
