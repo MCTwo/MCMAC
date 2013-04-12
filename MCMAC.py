@@ -330,7 +330,7 @@ def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,TSM_mes
         elif N_d > 3: #then assumed distribution array format
             d_proj = D_proj[numpy.random.randint(N_d)]
         elif N_d < 3:
-            print 'TSM.MCMCengine: Error, D_proj parameter input array is not a valid size, exiting'
+            print 'MCMAC.MCengine: Error, D_proj parameter input array is not a valid size, exiting'
             sys.exit()
         d_proj = abs(d_proj)
         
