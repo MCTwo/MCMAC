@@ -61,12 +61,6 @@ def vrad(z1,z2):
     v2 = ((1+z2)**2-1)/((1+z2)**2+1)*c
     return numpy.abs(v1-v2)/(1-v1*v2/c**2)
 
-
-def intptpt(a,b,r):
-    '''
-    integral[1/sqrt(a+b/r),r]
-    '''
-    return r*numpy.sqrt(a+b/r)/a-b*numpy.log(2*r*numpy.sqrt(a**2+a*b/r)+2*a*r+b)/(2*a**(3/2))
 def f(x,a,b):
     '''
     This is the functional form of the time since merger integral for two point
