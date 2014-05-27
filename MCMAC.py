@@ -415,7 +415,7 @@ def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,TSM_mes
         for j in numpy.arange(TSM_mesh):
             PE_array[j] = PEnfwnfw(d[j],m_1,rho_s_1,r_s_1,r_200_1,m_2,rho_s_2,r_s_2,r_200_2,N=del_mesh)        
 
-        # Calculate d_max        
+        # Calculate d_max
         if E >= -G*m_1*m_2/(r_200_1+r_200_2):
             # then d_max > r_200_1+r_200_2
             d_max = -G*m_1*m_2/E
@@ -429,7 +429,6 @@ def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,TSM_mes
             d_max = d[mask_tmp][-1]
             
         # Calculate TSM_0
-        flag # convert to time to collision TTC
         if d_3d >= r_200_1+r_200_2:
             # then halos no longer overlap
             # calculate the time it takes to go from d=0 to r_200_1+r_200_2
@@ -442,13 +441,6 @@ def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,TSM_mes
             # calculate the time it takes to go from d=0 to d_3d            
             mask = d <= d_3d
             TSM_0 = numpy.sum(del_TSM_mesh/numpy.sqrt(2/mu*(E-PE_array[mask]))*kminMpc/sinGyr)
-        
-        # Check that TSM_0 < Age of Universe at (z_1+z_2)/2
-        flag #no longer necessary for premerger case
-        age = cosmo.age((z_1+z_2)/2)
-        if TSM_0 > age:
-            # unlikely that this system could occur
-            continue
         
         # Calculate period
         if E >= -G*m_1*m_2/(r_200_1+r_200_2):
