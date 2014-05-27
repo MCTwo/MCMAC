@@ -295,9 +295,9 @@ def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,TSM_mes
     v_3d_col_out = numpy.zeros(N_mc)
     d_max_out = numpy.zeros(N_mc)
     TSM_0_out = numpy.zeros(N_mc)
-    TSM_1_out = numpy.zeros(N_mc)
     T_out = numpy.zeros(N_mc)
     prob_out = numpy.zeros(N_mc)
+    bound = numpy.zeros(N_mc) > 1
     
     N_d = numpy.size(D_proj)
     t_start = time.time()
@@ -468,15 +468,10 @@ def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,TSM_mes
         # Calculate probability of d_3d
         prob = TSM_0/(T/2)
         
-        # Calculate TSM_1
-        flag # no longer of much value
-        TSM_1 = T-TSM_0        
-
         if TSM_0 < 0:
             print 'TSM < 0 encountered'
         
         # Write calculated merger parameters
-        flag # may need to adjust after editing previous code
         m_1_out[i] = m_1
         m_2_out[i] = m_2
         z_1_out[i] = z_1
@@ -489,9 +484,8 @@ def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,TSM_mes
         v_3d_col_out[i] = v_3d_col
         d_max_out[i] = d_max
         TSM_0_out[i] = TSM_0
-        TSM_1_out[i] = TSM_1
         T_out[i] = T
-        prob_out[i] = prob        
+        prob_out[i] = prob 
         
         i+=1
         
@@ -503,71 +497,112 @@ def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,TSM_mes
             print 'Completed Monte Carlo iteration {0} of {1}.'.format(i,N_mc)
             print '~{0:0.0f} minutes remaining'.format(eta)
 
-    # Pickle the results of the MC analysis
-    flag # may need to adjust after editing previous code
-    filename = prefix+'_m_1.pickle'
+    # print the ratio of bound to total samples
+    print "Probability of system being bound = {0:0.5f}".format(numpy.sum(bound)/N_mc)
+    
+    # parse the output arrays into bound and unbound categories
+
+    # Pickle the results of the MC analysis for the bound samples
+    filename = prefix+'_bound_m_1.pickle'
     F = open(filename,'w')
-    pickle.dump(m_1_out,F)
+    pickle.dump(m_1_out[bound],F)
     F.close()
-    filename = prefix+'_m_2.pickle'
+    filename = prefix+'_bound_m_2.pickle'
     F = open(filename,'w')
-    pickle.dump(m_2_out,F)
+    pickle.dump(m_2_out[bound],F)
     F.close()
-    filename = prefix+'_z_1.pickle'
+    filename = prefix+'_bound_z_1.pickle'
     F = open(filename,'w')
-    pickle.dump(z_1_out,F)
+    pickle.dump(z_1_out[bound],F)
     F.close()    
-    filename = prefix+'_z_2.pickle'
+    filename = prefix+'_bound_z_2.pickle'
     F = open(filename,'w')
-    pickle.dump(z_2_out,F)
+    pickle.dump(z_2_out[bound],F)
     F.close()
-    filename = prefix+'_d_proj.pickle'
+    filename = prefix+'_bound_d_proj.pickle'
     F = open(filename,'w')
-    pickle.dump(d_proj_out,F)
+    pickle.dump(d_proj_out[bound],F)
     F.close()
-    filename = prefix+'_v_rad_obs.pickle'
+    filename = prefix+'_bound_v_rad_obs.pickle'
     F = open(filename,'w')
-    pickle.dump(v_rad_obs_out,F)
+    pickle.dump(v_rad_obs_out[bound],F)
     F.close()
-    filename = prefix+'_alpha.pickle'
+    filename = prefix+'_bound_alpha.pickle'
     F = open(filename,'w')
-    pickle.dump(alpha_out,F)
+    pickle.dump(alpha_out[bound],F)
     F.close()
-    filename = prefix+'_v_3d_obs.pickle'
+    filename = prefix+'_bound_v_3d_obs.pickle'
     F = open(filename,'w')
-    pickle.dump(v_3d_obs_out,F)
+    pickle.dump(v_3d_obs_out[bound],F)
     F.close()  
-    filename = prefix+'_d_3d.pickle'
+    filename = prefix+'_bound_d_3d.pickle'
     F = open(filename,'w')
-    pickle.dump(d_3d_out,F)
+    pickle.dump(d_3d_out[bound],F)
     F.close()    
-    filename = prefix+'_v_3d_col.pickle'
+    filename = prefix+'_bound_v_3d_col.pickle'
     F = open(filename,'w')
-    pickle.dump(v_3d_col_out,F)
+    pickle.dump(v_3d_col_out[bound],F)
     F.close()    
-    filename = prefix+'_d_max.pickle'
+    filename = prefix+'_bound_d_max.pickle'
     F = open(filename,'w')
-    pickle.dump(d_max_out,F)
+    pickle.dump(d_max_out[bound],F)
     F.close() 
-    filename = prefix+'_TSM_0.pickle'
+    filename = prefix+'_bound_TSM_0.pickle'
     F = open(filename,'w')
-    pickle.dump(TSM_0_out,F)
+    pickle.dump(TSM_0_out[bound],F)
     F.close()  
-    filename = prefix+'_TSM_1.pickle'
+    filename = prefix+'_bound_T.pickle'
     F = open(filename,'w')
-    pickle.dump(TSM_1_out,F)
-    F.close()    
-    filename = prefix+'_T.pickle'
-    F = open(filename,'w')
-    pickle.dump(T_out,F)
+    pickle.dump(T_out[bound],F)
     F.close()  
-    filename = prefix+'_prob.pickle'
+    filename = prefix+'_bound_prob.pickle'
     F = open(filename,'w')
-    pickle.dump(prob_out,F)
+    pickle.dump(prob_out[bound],F)
     F.close()    
     
-    flag # may need to adjust after editing previous code
-    return m_1_out,m_2_out,z_1_out,z_2_out,d_proj_out,v_rad_obs_out,alpha_out,v_3d_obs_out,d_3d_out,v_3d_col_out,d_max_out,TSM_0_out,TSM_1_out,T_out,prob_out
+    # Pickle the results of the MC analysis for the unbound case
+    filename = prefix+'_unbound_m_1.pickle'
+    F = open(filename,'w')
+    pickle.dump(m_1_out[~bound],F)
+    F.close()
+    filename = prefix+'_unbound_m_2.pickle'
+    F = open(filename,'w')
+    pickle.dump(m_2_out[~bound],F)
+    F.close()
+    filename = prefix+'_unbound_z_1.pickle'
+    F = open(filename,'w')
+    pickle.dump(z_1_out[~bound],F)
+    F.close()    
+    filename = prefix+'_unbound_z_2.pickle'
+    F = open(filename,'w')
+    pickle.dump(z_2_out[~bound],F)
+    F.close()
+    filename = prefix+'_unbound_d_proj.pickle'
+    F = open(filename,'w')
+    pickle.dump(d_proj_out[~bound],F)
+    F.close()
+    filename = prefix+'_unbound_v_rad_obs.pickle'
+    F = open(filename,'w')
+    pickle.dump(v_rad_obs_out[~bound],F)
+    F.close()
+    filename = prefix+'_unbound_alpha.pickle'
+    F = open(filename,'w')
+    pickle.dump(alpha_out[~bound],F)
+    F.close()
+    filename = prefix+'_unbound_v_3d_obs.pickle'
+    F = open(filename,'w')
+    pickle.dump(v_3d_obs_out[~bound],F)
+    F.close()  
+    filename = prefix+'_unbound_d_3d.pickle'
+    F = open(filename,'w')
+    pickle.dump(d_3d_out[~bound],F)
+    F.close()    
+    filename = prefix+'_unbound_v_3d_col.pickle'
+    F = open(filename,'w')
+    pickle.dump(v_3d_col_out[~bound],F)
+    F.close()    
+    
+    return m_1_out,m_2_out,z_1_out,z_2_out,d_proj_out,v_rad_obs_out,alpha_out,v_3d_obs_out,d_3d_out,v_3d_col_out,d_max_out,TSM_0_out,T_out,prob_out,bound
         
 
 """
