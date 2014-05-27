@@ -67,6 +67,7 @@ def f(x,a,b):
     masses.
     '''
     return 1/numpy.sqrt(a+b/x)
+
 def TSMptpt(m_1,m_2,r_200_1,r_200_2,d_end,E):
     '''
     This function calculates the time it takes for the system to go from a
@@ -96,7 +97,6 @@ def TSMptpt(m_1,m_2,r_200_1,r_200_2,d_end,E):
     if t < 0:
         print 'TSM < 0 encountered'    
     return t
-      
 
 def PEnfwnfw(d,m_1,rho_s_1,r_s_1,r_200_1,m_2,rho_s_2,r_s_2,r_200_2,N=100):
     '''
@@ -375,6 +375,7 @@ def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,TSM_mes
         
         if v_3d_obs > v_3d_max:
             # then the randomly chosen alpha is not valid
+            flag # don't throw out, may represent unbound case
             continue
         
         # Calculate the 3D separation
@@ -388,6 +389,7 @@ def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,TSM_mes
         
         if v_3d_col > v_3d_max:
             # then the randomly chosen alpha is not valid
+            flag # don't throw out, may represent unbound case
             continue
         
         # Total Energy
@@ -414,6 +416,7 @@ def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,TSM_mes
             d_max = d[mask_tmp][-1]
             
         # Calculate TSM_0
+        flag # convert to time to collision TTC
         if d_3d >= r_200_1+r_200_2:
             # then halos no longer overlap
             # calculate the time it takes to go from d=0 to r_200_1+r_200_2
@@ -428,6 +431,7 @@ def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,TSM_mes
             TSM_0 = numpy.sum(del_TSM_mesh/numpy.sqrt(2/mu*(E-PE_array[mask]))*kminMpc/sinGyr)
         
         # Check that TSM_0 < Age of Universe at (z_1+z_2)/2
+        flag #no longer necessary for premerger case
         age = cosmo.age((z_1+z_2)/2)
         if TSM_0 > age:
             # unlikely that this system could occur
@@ -452,12 +456,14 @@ def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,TSM_mes
         prob = TSM_0/(T/2)
         
         # Calculate TSM_1
+        flag # no longer of much value
         TSM_1 = T-TSM_0        
 
         if TSM_0 < 0:
             print 'TSM < 0 encountered'
         
         # Write calculated merger parameters
+        flag # may need to adjust after editing previous code
         m_1_out[i] = m_1
         m_2_out[i] = m_2
         z_1_out[i] = z_1
@@ -485,6 +491,7 @@ def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,TSM_mes
             print '~{0:0.0f} minutes remaining'.format(eta)
 
     # Pickle the results of the MC analysis
+    flag # may need to adjust after editing previous code
     filename = prefix+'_m_1.pickle'
     F = open(filename,'w')
     pickle.dump(m_1_out,F)
@@ -546,7 +553,7 @@ def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,TSM_mes
     pickle.dump(prob_out,F)
     F.close()    
     
-    
+    flag # may need to adjust after editing previous code
     return m_1_out,m_2_out,z_1_out,z_2_out,d_proj_out,v_rad_obs_out,alpha_out,v_3d_obs_out,d_3d_out,v_3d_col_out,d_max_out,TSM_0_out,TSM_1_out,T_out,prob_out
         
 
