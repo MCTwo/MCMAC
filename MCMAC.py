@@ -373,11 +373,6 @@ def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,TSM_mes
         # Calculate the 3D velocity at observed time
         v_3d_obs = v_rad_obs/numpy.sin(alpha)
         
-        if v_3d_obs > v_3d_max:
-            # then the randomly chosen alpha is not valid
-            flag # don't throw out, may represent unbound case
-            continue
-        
         # Calculate the 3D separation
         d_3d = d_proj/numpy.cos(alpha)
         
