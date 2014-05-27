@@ -383,9 +383,27 @@ def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,TSM_mes
         v_3d_col = numpy.sqrt(v_3d_obs**2+2/mu*(PE_obs-PE_col))
         
         if v_3d_col > v_3d_max:
-            # then the randomly chosen alpha is not valid
-            flag # don't throw out, may represent unbound case
+            # then the randomly chosen alpha results in an unbound scenario
+            # the rest of the calculation in the loop are not meaningful so just
+            # record the valuable parameters
+            m_1_out[i] = m_1
+            m_2_out[i] = m_2
+            z_1_out[i] = z_1
+            z_2_out[i] = z_2
+            d_proj_out[i] = d_proj
+            v_rad_obs_out[i] = v_rad_obs
+            alpha_out[i] = alpha*180/numpy.pi
+            v_3d_obs_out[i] = v_3d_obs
+            d_3d_out[i] = d_3d
+            v_3d_col_out[i] = v_3d_col
+            bound[i] = False
+            
+            i+=1            
             continue
+        else:
+            # then the randomly chosen alpha results in a bound scenario
+            # the rest of the calcualtions are meaningful
+            bound[i] = True
         
         # Total Energy
         E = PE_obs+mu/2*v_3d_obs**2
