@@ -299,6 +299,18 @@ def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,TSM_mes
     prob_out = numpy.zeros(N_mc)
     bound = numpy.zeros(N_mc) > 1
     
+    # Estimate rough average redshift and Hubble parameter
+    # these will be used to determine valid unbound states
+    if numpy.logical_and(numpy.size(Z1)==2,numpy.size(Z2)==2):
+        z_1_mean = Z1[0]
+        z_2_mean = Z2[0]
+    elif numpy.logical_and(numpy.size(Z1)>2,numpy.size(Z2)>2):
+        z_1_mean = numpy.mean(Z1)
+        z_2_mean = numpy.mean(Z2)
+    z_mean = (z_1_mean + z_2_mean)/2.
+    # Hubble parameter at mean cluster redshift
+    H = cosmo.H(z_mean)
+    
     N_d = numpy.size(D_proj)
     t_start = time.time()
     while i < N_mc:
@@ -383,23 +395,46 @@ def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,TSM_mes
         v_3d_col = numpy.sqrt(v_3d_obs**2+2/mu*(PE_obs-PE_col))
         
         if v_3d_col > v_3d_max:
-            # then the randomly chosen alpha results in an unbound scenario
-            # the rest of the calculation in the loop are not meaningful so just
-            # record the valuable parameters
-            m_1_out[i] = m_1
-            m_2_out[i] = m_2
-            z_1_out[i] = z_1
-            z_2_out[i] = z_2
-            d_proj_out[i] = d_proj
-            v_rad_obs_out[i] = v_rad_obs
-            alpha_out[i] = alpha*180/numpy.pi
-            v_3d_obs_out[i] = v_3d_obs
-            d_3d_out[i] = d_3d
-            v_3d_col_out[i] = v_3d_col
-            bound[i] = False
+            # then the randomly chosen alpha results in a possible unbound
+            # scenario, need to verify that it is actually possible given the
+            # two body assumption, i.e. that the radial relative velocity of the
+            # subclusters is less than the radial Hubble flow velocity
+            d_rad = d_3d * numpy.sin(alpha)
+            v_rad_hubble = H * d_rad
             
-            i+=1            
-            continue
+            if v_rad_obs <= v_rad_hubble:
+                # then this is a reasonable unbound solution
+                # the rest of the calculations in the loop are not meaningful
+                # though, so just record the valuable parameters
+                m_1_out[i] = m_1
+                m_2_out[i] = m_2
+                z_1_out[i] = z_1
+                z_2_out[i] = z_2
+                d_proj_out[i] = d_proj
+                v_rad_obs_out[i] = v_rad_obs
+                alpha_out[i] = alpha*180/numpy.pi
+                v_3d_obs_out[i] = v_3d_obs
+                d_3d_out[i] = d_3d
+                v_3d_col_out[i] = v_3d_col
+                bound[i] = False
+                
+                i+=1
+                
+                # Estimate calculation time
+                if i== 10 or i == 100 or i%1000 == 0:
+                    del_t = time.time()-t_start
+                    t_total = N_mc*del_t/i
+                    eta = (t_total-del_t)/60
+                    print 'Completed Monte Carlo iteration {0} of {1}.'.format(i,N_mc)
+                    print '~{0:0.0f} minutes remaining'.format(eta)            
+                
+                continue
+            
+            else:
+                # this unbound realization is not allowed, skip to next
+                # realization
+                continue
+
         else:
             # then the randomly chosen alpha results in a bound scenario
             # the rest of the calcualtions are meaningful
