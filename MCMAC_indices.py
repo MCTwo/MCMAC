@@ -1,3 +1,7 @@
+'''
+Version 0.0
+- The initial version of the old TSM_v11 that is now being tracked in Git.
+'''
 from __future__ import division
 import numpy
 import scipy.integrate
@@ -38,11 +42,13 @@ def randdraw(A,index=None):
             index = numpy.random.randint(N_A)
         a = A[index]
     elif N_A <2:
-        print 'MCMAC.randdraw: Error, parameter input array is not a valid size, exiting'
+        print 'MCMAC.randdraw: Error, parameter input array is not a \
+            valid size, exiting'
         sys.exit()
     return a, index
 
-def vrad(z1,z2):
+
+def vrad(z1, z2):
     '''
     Given the redshifts of the two subclusters this function calculates their
     relative line-of-sight velocity (km/s).
@@ -57,12 +63,15 @@ def vrad(z1,z2):
     v2 = ((1+z2)**2-1)/((1+z2)**2+1)*c
     return numpy.abs(v1-v2)/(1-v1*v2/c**2)
 
+
 def f(x,a,b):
     '''
     This is the functional form of the time since merger integral for two point
     masses.
     '''
     return 1/numpy.sqrt(a+b/x)
+
+
 def TSMptpt(m_1,m_2,r_200_1,r_200_2,d_end,E):
     '''
     This function calculates the time it takes for the system to go from a
@@ -113,6 +122,7 @@ def PEnfwnfw(d,m_1,rho_s_1,r_s_1,r_200_1,m_2,rho_s_2,r_s_2,r_200_2,N=100):
     V_total = [float; units:(km/s)^2*M_sun] total potential energy of the two
         subcluster system
     '''
+
     if d >= r_200_1+r_200_2:
         V_total = -G*m_1*m_2/d
     else:
@@ -136,6 +146,7 @@ def PEnfwnfw(d,m_1,rho_s_1,r_s_1,r_200_1,m_2,rho_s_2,r_s_2,r_200_2,N=100):
         V_total = V_nfw+V_pt
     return V_total
 
+
 def NFWprop(M_200,z,c):
     '''
     Determines the NFW halo related properties. Added this for the case of user
@@ -155,8 +166,8 @@ def NFWprop(M_200,z,c):
     rho_s = del_c*rho_cr
     return del_c, r_s, r_200, c, rho_s
 
-def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,
-             TSM_mesh=200,seed=None):
+
+def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,TSM_mesh=200):
     '''
     This is the Monte Carlo engine that draws random parameters from the
     measured distributions and then calculates the kenematic parameters of the
@@ -230,13 +241,7 @@ def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,
        observe the system near the apoapsis rather than with zero separation,
        due to the system spending more of its time at large separation.  Simply
        an effect of the velocity of the system.
-    seed = float or int - random number seed that is going to be fixed for
-    debugging purposes
     '''
-    if seed is not None:
-        numpy.random.seed(seed)
-
-
     # Verify user input
     # Check to make sure mass inputs for each halo are the same
     N_M1 = numpy.size(M1)
@@ -284,6 +289,7 @@ def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,
         redshifts and mass estimates are uncorrelated. Covariance will not be \
         handled correctly.'
 
+
     i = 0
     # Create the output arrays
     m_1_out = numpy.zeros(N_mc)
@@ -301,6 +307,7 @@ def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,
     TSM_1_out = numpy.zeros(N_mc)
     T_out = numpy.zeros(N_mc)
     prob_out = numpy.zeros(N_mc)
+    indices_out = numpy.size(N_mc)
 
     N_d = numpy.size(D_proj)
     t_start = time.time()
@@ -476,6 +483,7 @@ def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,
         TSM_1_out[i] = TSM_1
         T_out[i] = T
         prob_out[i] = prob
+        indices_out[i] = index
 
         i+=1
 
@@ -546,11 +554,14 @@ def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,
     F.close()
     filename = prefix+'_prob.pickle'
     F = open(filename,'w')
+    filename = prefix+'_indices.pickle'
+    F.close()
+    F = open(filename,'w')
     pickle.dump(prob_out,F)
     F.close()
 
-
     return m_1_out,m_2_out,z_1_out,z_2_out,d_proj_out,v_rad_obs_out,alpha_out,v_3d_obs_out,d_3d_out,v_3d_col_out,d_max_out,TSM_0_out,TSM_1_out,T_out,prob_out
+
 
 
 """
