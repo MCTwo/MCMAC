@@ -167,7 +167,8 @@ def NFWprop(M_200,z,c):
     return del_c, r_s, r_200, c, rho_s
 
 
-def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,TSM_mesh=200):
+def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,
+        TSM_mesh=200, seed=None):
     '''
     This is the Monte Carlo engine that draws random parameters from the
     measured distributions and then calculates the kenematic parameters of the
@@ -241,7 +242,12 @@ def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,TSM_mes
        observe the system near the apoapsis rather than with zero separation,
        due to the system spending more of its time at large separation.  Simply
        an effect of the velocity of the system.
+    seed = float or int, random number seed to be fixed for debugging
+    purposes so we get deterministic outputs 
     '''
+    if seed is not None: 
+        numpy.random.seed(seed)
+
     # Verify user input
     # Check to make sure mass inputs for each halo are the same
     N_M1 = numpy.size(M1)
@@ -307,7 +313,12 @@ def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,TSM_mes
     TSM_1_out = numpy.zeros(N_mc)
     T_out = numpy.zeros(N_mc)
     prob_out = numpy.zeros(N_mc)
-    indices_out = numpy.size(N_mc)
+    if N_D_proj == N_M1:
+        # assume D_proj array values and order correlated with M1 and M2
+        # array values and order or else it doesn't make sense to track the
+        # indices
+        print "assuming d_proj is correlated with m1" 
+        indices_out = numpy.zeros(N_mc)
 
     N_d = numpy.size(D_proj)
     t_start = time.time()
@@ -483,7 +494,10 @@ def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,TSM_mes
         TSM_1_out[i] = TSM_1
         T_out[i] = T
         prob_out[i] = prob
-        indices_out[i] = index
+        if N_D_proj == N_M1:
+            # assume D_proj array values and order correlated with M1 and M2
+            # array values and order.
+            indices_out[i] = index
 
         i+=1
 
@@ -554,11 +568,17 @@ def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,TSM_mes
     F.close()
     filename = prefix+'_prob.pickle'
     F = open(filename,'w')
-    filename = prefix+'_indices.pickle'
-    F.close()
-    F = open(filename,'w')
     pickle.dump(prob_out,F)
     F.close()
+
+    if N_D_proj == N_M1:
+        # assume D_proj array values and order correlated with M1 and M2
+        # array values and order.
+        print "assuming d_proj is correlated with m1" 
+        filename = prefix+'_indices.pickle'
+        F = open(filename,'w')
+        pickle.dump(indices_out,F)
+        F.close()
 
     return m_1_out,m_2_out,z_1_out,z_2_out,d_proj_out,v_rad_obs_out,alpha_out,v_3d_obs_out,d_3d_out,v_3d_col_out,d_max_out,TSM_0_out,TSM_1_out,T_out,prob_out
 
