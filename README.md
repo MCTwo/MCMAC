@@ -19,3 +19,5 @@ Dependencies:
 - MCC utilities (see git://github.com/MCTwo/MCCutils.git)
   - profiles
   - cosmo
+
+[![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.10242.svg)](http://dx.doi.org/10.5281/zenodo.10242)
