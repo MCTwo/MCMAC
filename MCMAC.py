@@ -525,8 +525,8 @@ def MCengine(N_mc,M1,M2,Z1,Z2,D_proj,prefix,C1=None,C2=None,del_mesh=100,TSM_mes
             print '~{0:0.0f} minutes remaining'.format(eta)
 
     # print the ratio of bound to total samples
-    print "Probability of system being bound = {0:0.5f}".format(numpy.sum(bound)/N_mc)
-    
+    print "Probability of system {0} being bound = {1:0.5f}".format(prefix, numpy.sum(bound)/N_mc)
+
     # parse the output arrays into bound and unbound categories
 
     # Pickle the results of the MC analysis for the bound samples
